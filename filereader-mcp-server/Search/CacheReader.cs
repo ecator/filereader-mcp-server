@@ -34,11 +34,12 @@ namespace FileReaderMcpServer.Search
 
         public static string GetKeyFromFilePath(string file)
         {
-            foreach(var allowedDir in GlobalState.AllowedDirectories)
+            file = file.Replace("\\", "/");
+            foreach (var allowedDir in GlobalState.AllowedDirectories)
             {
-                if (file.StartsWith(allowedDir, StringComparison.OrdinalIgnoreCase))
+                if (file.StartsWith(allowedDir.Replace("\\", "/") + "/", StringComparison.OrdinalIgnoreCase))
                 {
-                    return allowedDir;
+                    return allowedDir.ToLowerInvariant();
                 }
             }
             throw new ArgumentException($"File '{file}' is not in an allowed directory.");
@@ -46,6 +47,7 @@ namespace FileReaderMcpServer.Search
 
         public static Document ReadTextFileDocument(string file)
         {
+            file = file.ToLowerInvariant();
             var key = GetKeyFromFilePath(file);
             var fileName = GetSha256(file) + ".json";
             var cachePath = Path.Combine(EnsureAndGetCacheFolder(key), fileName);
@@ -93,6 +95,7 @@ namespace FileReaderMcpServer.Search
 
         public static List<Document> ReadExcelFileDocument(ExcelSession session, string file)
         {
+            file = file.ToLowerInvariant();
             var key = GetKeyFromFilePath(file);
             var fileName = GetSha256(file) + ".json";
             var cachePath = Path.Combine(EnsureAndGetCacheFolder(key), fileName);
@@ -184,6 +187,7 @@ namespace FileReaderMcpServer.Search
 
         public static List<Document> ReadWordFileDocument(WordSession session, string file)
         {
+            file = file.ToLowerInvariant();
             var key = GetKeyFromFilePath(file);
             var fileName = GetSha256(file) + ".json";
             var cachePath = Path.Combine(EnsureAndGetCacheFolder(key), fileName);
@@ -243,6 +247,7 @@ namespace FileReaderMcpServer.Search
 
         public static List<Document> ReadPowerPointFileDocument(PowerPointSession session, string file)
         {
+            file = file.ToLowerInvariant();
             var key = GetKeyFromFilePath(file);
             var fileName = GetSha256(file) + ".json";
             var cachePath = Path.Combine(EnsureAndGetCacheFolder(key), fileName);

@@ -25,8 +25,7 @@ namespace FileReaderMcpServer
                     Console.Error.WriteLine($"Error: The directory does not exist: {arg}");
                     Environment.Exit(1);
                 }
-                var d = Path.GetFullPath(arg).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar).ToLowerInvariant();
-                d += Path.DirectorySeparatorChar; // Ensure it ends with a separator for consistent checking 
+                var d = Path.GetFullPath(arg).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
                 GlobalState.AllowedDirectories.Add(d);
 
             }

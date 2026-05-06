@@ -13,9 +13,10 @@ public static class FileChecker
         {
             filePath = Path.GetFullPath(filePath);
         }
+        filePath = filePath.Replace("\\", "/");
         foreach (var allowedDir in GlobalState.AllowedDirectories)
         {
-            if (filePath.StartsWith(allowedDir, StringComparison.OrdinalIgnoreCase))
+            if (filePath.StartsWith(allowedDir.Replace("\\", "/") + "/", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
@@ -30,7 +31,7 @@ public static class FileChecker
             throw new McpException("Directory is required.");
         }
 
-        if (!CheckFileIsAllowed(directory))
+        if (!CheckFileIsAllowed(directory + Path.DirectorySeparatorChar))
         {
             throw new McpException("The provided directory is not in the allowed directories.");
         }
