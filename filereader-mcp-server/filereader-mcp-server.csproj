@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>FileReaderMcpServer</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <PublishAot>False</PublishAot>
+    <BuiltInComSupport>true</BuiltInComSupport>
+    <AssemblyVersion>$(Version)</AssemblyVersion>
+    <Title>$(AssemblyName)</Title>
+    <Version>0.1.0</Version>
+    <Authors>Martin</Authors>
+    <Company>Martin Cat</Company>
+    <Copyright>© 2026 Martin Cat. All Rights Reserved.</Copyright>
+    <Description>Windows MCP Server for search/read Office/PDF/md/txt files</Description>
+    <PackageProjectUrl>&gt;https://github.com/ecator/filereader-mcp-server</PackageProjectUrl>
+    <FileVersion>$(Version)</FileVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ElBruno.BM25" Version="0.5.0" />
+    <PackageReference Include="jieba.NET" Version="0.42.2" GeneratePathProperty="true" />
+    <PackageReference Include="MeCab.DotNet" Version="1.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.7" />
+    <PackageReference Include="ModelContextProtocol" Version="1.2.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="$(Pkgjieba_NET)\Resources\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <Link>Resources\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Microsoft.Office.Interop.Excel">
+      <HintPath>..\dll\Microsoft.Office.Interop.Excel.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Outlook">
+      <HintPath>..\dll\Microsoft.Office.Interop.Outlook.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.PowerPoint">
+      <HintPath>..\dll\Microsoft.Office.Interop.PowerPoint.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Office.Interop.Word">
+      <HintPath>..\dll\Microsoft.Office.Interop.Word.dll</HintPath>
+    </Reference>
+    <Reference Include="office">
+      <HintPath>..\dll\office.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,8 @@
+.vs/
+bin/
+obj/
+*.csproj.user
+*.pubxml.user
+TestResults/
+test-data/test.md
+win-x64/

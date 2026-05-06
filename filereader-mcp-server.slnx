@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="filereader-mcp-server/filereader-mcp-server.csproj" />
+  <Project Path="test-unit/test-unit.csproj" Id="8548c136-78be-4837-ba1c-a7d144a1b4c2" />
+</Solution>
