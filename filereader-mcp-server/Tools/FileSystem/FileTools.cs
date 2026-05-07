@@ -230,7 +230,7 @@ public static class FileTools
             foreach (var file in Directory.EnumerateFiles(directory, "*.*", searchOption))
             {
                 var ext = Path.GetExtension(file).TrimStart('.').ToLowerInvariant();
-                if (extSet.Contains(ext))
+                if (extSet.Contains(ext) && FileChecker.CheckFileIsAllowed(file, false))
                 {
                     matchedFiles.Add(file);
                 }
