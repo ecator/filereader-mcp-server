@@ -1,4 +1,4 @@
-﻿using ModelContextProtocol;
+using ModelContextProtocol;
 using ModelContextProtocol.Server;
 using Newtonsoft.Json;
 using System;
@@ -11,6 +11,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CacheReader = FileReaderMcpServer.Search.CacheReader;
 using Word = Microsoft.Office.Interop.Word;
+using FileReaderMcpServer.Utilities;
 
 namespace FileReaderMcpServer.Tools.Office;
 
@@ -25,14 +26,14 @@ public static class WordTools
         var data = new StringBuilder();
         var count = 0;
         data.AppendLine();
-        var checkedFile = Validation.FileChecker.CheckFile(file);
+        FileChecker.CheckWordFile(file);
         using (var session = new WordSession())
         {
-            var docs = CacheReader.ReadWordFileDocument(session, checkedFile);
+            var docs = CacheReader.ReadWordFileDocument(session, file);
 
             count = docs.Count;
         }
-        data.Insert(0, $"Total `{count}` pages in the Word file `{checkedFile}`.");
+        data.Insert(0, $"Total `{count}` pages in the Word file `{file}`.");
         return data.ToString();
     }
 
@@ -43,10 +44,10 @@ public static class WordTools
         )
     {
         var data = "";
-        var checkedFile = Validation.FileChecker.CheckFile(file);
+        FileChecker.CheckWordFile(file);
         using (var session = new WordSession())
         {
-            var docs = CacheReader.ReadWordFileDocument(session, checkedFile);
+            var docs = CacheReader.ReadWordFileDocument(session, file);
 
             var pages = docs.Select(doc => doc.Content).ToList();
             data = string.Join(Environment.NewLine, pages.Skip(fromPage-1).Take(count.Value));
@@ -84,8 +85,18 @@ public static class WordTools
 
             foreach (var file in files)
             {
-                var checkedFile = Validation.FileChecker.CheckFile(file);
-                var docs = CacheReader.ReadWordFileDocument(session, checkedFile);
+                if (totalCount >= max) break;
+                try
+                {
+                    FileChecker.CheckWordFile(file);
+
+                }
+                catch (Exception ex)
+                {
+                    data.AppendLine($"Error checking file `{file}`: {ex.Message}");
+                    continue;
+                }
+                var docs = CacheReader.ReadWordFileDocument(session, file);
                 count = 0;
                 foundData.Clear();
                 foundData.AppendLine();
@@ -103,18 +114,14 @@ public static class WordTools
                         totalCount++;
                         count++;
                         line[0] = doc.Metadata["PageNumber"].ToString();
-                        line[1] = session.EscapeMarkdownTableValue(doc.Content);
+                        line[1] = MarkdownHelper.EscapeMarkdownTableValue(doc.Content);
                         foundData.AppendLine(string.Join("|", line));
-                        if (totalCount >= max)
-                        {
-                            break;
-                        }
 
                     }
                 }
                 if (count > 0)
                 {
-                    foundData.Insert(0, $"`{count}` results in `{checkedFile}`:");
+                    foundData.Insert(0, $"`{count}` results in `{file}`:");
                     data.AppendLine(foundData.ToString());
                 }
             }

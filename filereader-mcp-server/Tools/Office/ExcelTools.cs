@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CacheReader = FileReaderMcpServer.Search.CacheReader;
 using Excel = Microsoft.Office.Interop.Excel;
+using FileReaderMcpServer.Utilities;
 
 namespace FileReaderMcpServer.Tools.Office;
 
@@ -26,17 +27,17 @@ public static class ExcelTools
         var data = new StringBuilder();
         var count = 0;
         data.AppendLine();
-        var checkedFile = Validation.FileChecker.CheckFile(file);
+        FileChecker.CheckExcelFile(file);
         using (var session = new ExcelSession())
         {
-            var docs = CacheReader.ReadExcelFileDocument(session, checkedFile);
+            var docs = CacheReader.ReadExcelFileDocument(session, file);
             foreach (var doc in docs)
             {
                 count++;
                 data.AppendLine($"{count}. {doc.Metadata["SheetName"].ToString()}");
             }
         }
-        data.Insert(0, $"Total `{count}` sheets in the Excel file `{checkedFile}`:");
+        data.Insert(0, $"Total `{count}` sheets in the Excel file `{file}`:");
         return data.ToString();
     }
 
@@ -54,10 +55,10 @@ public static class ExcelTools
         var values = new Dictionary<string, object>();
 
         var found = false;
-        var checkedFile = Validation.FileChecker.CheckFile(file);
+        FileChecker.CheckExcelFile(file);
         using (var session = new ExcelSession())
         {
-            var docs = CacheReader.ReadExcelFileDocument(session, checkedFile);
+            var docs = CacheReader.ReadExcelFileDocument(session, file);
             foreach (var doc in docs)
             {
                 if (doc.Metadata["SheetName"].ToString() == sheetName)
@@ -96,10 +97,10 @@ public static class ExcelTools
     {
         var values = new Dictionary<string, object>();
         var found = false;
-        var checkedFile = Validation.FileChecker.CheckFile(file);
+        FileChecker.CheckExcelFile(file);
         using (var session = new ExcelSession())
         {
-            var docs = CacheReader.ReadExcelFileDocument(session, checkedFile);
+            var docs = CacheReader.ReadExcelFileDocument(session, file);
             foreach(var doc in docs)
             {
                 if (doc.Metadata["SheetName"].ToString() == sheetName)
@@ -149,8 +150,18 @@ public static class ExcelTools
         {
             foreach (var file in files)
             {
-                var checkedFile = Validation.FileChecker.CheckFile(file);
-                var docs = CacheReader.ReadExcelFileDocument(session, checkedFile);
+                if (totalCount >= max) break;
+                try
+                {
+                    FileChecker.CheckExcelFile(file);
+
+                }
+                catch (Exception ex)
+                {
+                    data.AppendLine($"Error checking file `{file}`: {ex.Message}");
+                    continue;
+                }
+                var docs = CacheReader.ReadExcelFileDocument(session, file);
                 count = 0;
                 foundData.Clear();
                 foundData.AppendLine();
@@ -171,19 +182,15 @@ public static class ExcelTools
                             count++;
                             line[0] = doc.Metadata["SheetName"].ToString();
                             line[1] = kvp.Key;
-                            line[2] = session.EscapeMarkdownTableValue(Convert.ToString(kvp.Value));
+                            line[2] = MarkdownHelper.EscapeMarkdownTableValue(Convert.ToString(kvp.Value));
                             foundData.AppendLine(string.Join("|", line));
-                            if(totalCount >= max)
-                            {
-                                break;
-                            }
                         }
 
                     }
                 }
                 if(count > 0)
                 {
-                    foundData.Insert(0, $"`{count}` results in `{checkedFile}`:");
+                    foundData.Insert(0, $"`{count}` results in `{file}`:");
                     data.AppendLine(foundData.ToString());
                 }
             }

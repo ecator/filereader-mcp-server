@@ -7,8 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
-using FileReaderMcpServer.Validation;
 using FileReaderMcpServer.Search;
+using FileReaderMcpServer.Utilities;
 
 namespace FileReaderMcpServer.Tools.Text;
 
@@ -21,7 +21,7 @@ public static class TextTools
         [Description("The starting line number (1-indexed).")] int startLine = 1,
         [Description("The number of lines to read.")] int count = 1000)
     {
-        file = FileChecker.CheckFile(file);
+        FileChecker.CheckTextFile(file);
 
         if (startLine < 1)
         {
@@ -51,7 +51,7 @@ public static class TextTools
     public static string GetLines(
         [Description("The absolute path of the text file.")] string file)
     {
-        file = FileChecker.CheckFile(file);
+        FileChecker.CheckTextFile(file);
 
         try
         {
@@ -93,10 +93,9 @@ public static class TextTools
         {
             if (totalMatches >= max) break;
 
-            string checkedFile;
             try
             {
-                checkedFile = FileChecker.CheckFile(file);
+                FileChecker.CheckTextFile(file);
             }
             catch (Exception ex)
             {
@@ -109,7 +108,7 @@ public static class TextTools
             try
             {
                 int lineNumber = 0;
-                var doc = CacheReader.ReadTextFileDocument(checkedFile);
+                var doc = CacheReader.ReadTextFileDocument(file);
                 var content = doc.Content;
                 var lines = content.Replace("\r\n", "\n").Split('\n');
                 foreach (var line in lines)
@@ -127,13 +126,13 @@ public static class TextTools
             }
             catch (Exception ex)
             {
-                sb.AppendLine($"- Error reading {checkedFile}: {ex.Message}");
+                sb.AppendLine($"- Error reading {file}: {ex.Message}");
                 continue;
             }
 
             if (fileMatches.Count > 0)
             {
-                sb.AppendLine($"- {fileMatches.Count} matched lines in {checkedFile}");
+                sb.AppendLine($"- {fileMatches.Count} matched lines in {file}");
                 foreach (var match in fileMatches)
                 {
                     sb.AppendLine($"  - {match.lineNumber} : {match.lineContent}");

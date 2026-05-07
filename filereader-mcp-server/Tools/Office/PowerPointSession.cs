@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 using System.Text.RegularExpressions;
 using Microsoft.Office.Core;
+using FileReaderMcpServer.Utilities;
 
 namespace FileReaderMcpServer.Tools.Office;
 
@@ -140,7 +141,7 @@ public class PowerPointSession : Session<PowerPoint.Application>
                             {
                                 var cellTextRange = cellTextFrame.TextRange;
                                 RegisterComObject(cellTextRange);
-                                cellText = EscapeMarkdownTableValue(cellTextRange.Text);
+                                cellText = MarkdownHelper.EscapeMarkdownTableValue(cellTextRange.Text);
                             }
                         }
                         line[c - 1] = cellText;

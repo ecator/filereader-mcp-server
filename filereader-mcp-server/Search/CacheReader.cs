@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Text;
+using UglyToad.PdfPig;
+using FileReaderMcpServer.Utilities;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace FileReaderMcpServer.Search
@@ -24,7 +26,7 @@ namespace FileReaderMcpServer.Search
 
         public static string EnsureAndGetCacheFolder(string key)
         {
-            var cachePath = Path.Combine(EnsureAndGetCacheFolder(), GetSha256(key));
+            var cachePath = Path.Combine(EnsureAndGetCacheFolder(), GetHash(key));
             if (!Directory.Exists(cachePath))
             {
                 Directory.CreateDirectory(cachePath);
@@ -47,9 +49,8 @@ namespace FileReaderMcpServer.Search
 
         public static Document ReadTextFileDocument(string file)
         {
-            file = file.ToLowerInvariant();
             var key = GetKeyFromFilePath(file);
-            var fileName = GetSha256(file) + ".json";
+            var fileName = GetHash(file) + ".json";
             var cachePath = Path.Combine(EnsureAndGetCacheFolder(key), fileName);
             Document doc = null;
             var overwriteCache = false;
@@ -97,7 +98,7 @@ namespace FileReaderMcpServer.Search
         {
             file = file.ToLowerInvariant();
             var key = GetKeyFromFilePath(file);
-            var fileName = GetSha256(file) + ".json";
+            var fileName = GetHash(file) + ".json";
             var cachePath = Path.Combine(EnsureAndGetCacheFolder(key), fileName);
             var docs = new List<Document>();
             Document doc = null;
@@ -156,7 +157,7 @@ namespace FileReaderMcpServer.Search
                             if (val is null) continue;
                             string address = $"{ExcelSession.ColumnIndexToLetter(baseCol + j - 1)}{baseRow + i - 1}";
                             values[address] = val;
-                            lineValues.Add(session.EscapeMarkdownTableValue(val.ToString()));
+                            lineValues.Add(MarkdownHelper.EscapeMarkdownTableValue(val.ToString()));
                         }
                         sb.AppendLine(string.Join("\t",lineValues));
                     }
@@ -189,7 +190,7 @@ namespace FileReaderMcpServer.Search
         {
             file = file.ToLowerInvariant();
             var key = GetKeyFromFilePath(file);
-            var fileName = GetSha256(file) + ".json";
+            var fileName = GetHash(file) + ".json";
             var cachePath = Path.Combine(EnsureAndGetCacheFolder(key), fileName);
             var docs = new List<Document>();
             Document doc = null;
@@ -245,11 +246,72 @@ namespace FileReaderMcpServer.Search
 
         }
 
+        public static List<Document> ReadPdfFileDocument(string file)
+        {
+            file = file.ToLowerInvariant();
+            var key = GetKeyFromFilePath(file);
+            var fileName = GetHash(file) + ".json";
+            var cachePath = Path.Combine(EnsureAndGetCacheFolder(key), fileName);
+            var docs = new List<Document>();
+            Document doc = null;
+            var overwriteCache = false;
+            if (File.Exists(cachePath))
+            {
+                var fileUpdatedTime = File.GetLastWriteTime(file);
+                var cacheUpdatedTime = File.GetLastWriteTime(cachePath);
+                if (fileUpdatedTime > cacheUpdatedTime)
+                {
+                    overwriteCache = true;
+                }
+                else
+                {
+                    docs = JsonConvert.DeserializeObject<List<Document>>(File.ReadAllText(cachePath));
+                    if (docs == null)
+                    {
+                        overwriteCache = true;
+                    }
+                }
+
+            }
+            else
+            {
+                overwriteCache = true;
+            }
+
+            if (overwriteCache)
+            {
+                using (var pdfDocument = PdfDocument.Open(file))
+                {
+                    for (var i = 1; i <= pdfDocument.NumberOfPages; i++)
+                    {
+                        var page = pdfDocument.GetPage(i);
+                        var pageText = page.Text;
+                        var metadata = new Dictionary<string, object>();
+                        metadata["PageNumber"] = i;
+                        doc = new Document
+                        {
+                            FilePath = file,
+                            Content = pageText,
+                            Tokens = Tokenizer.Tokenize(pageText, GlobalState.Language),
+                            Metadata = metadata
+
+                        };
+                        docs.Add(doc);
+                    }
+                }
+
+                File.WriteAllText(cachePath, JsonConvert.SerializeObject(docs), new UTF8Encoding(false));
+            }
+
+            return docs;
+
+        }
+
         public static List<Document> ReadPowerPointFileDocument(PowerPointSession session, string file)
         {
             file = file.ToLowerInvariant();
             var key = GetKeyFromFilePath(file);
-            var fileName = GetSha256(file) + ".json";
+            var fileName = GetHash(file) + ".json";
             var cachePath = Path.Combine(EnsureAndGetCacheFolder(key), fileName);
             var docs = new List<Document>();
             Document doc = null;
@@ -318,10 +380,9 @@ namespace FileReaderMcpServer.Search
 
         }
 
-        public static string GetSha256(string input)
+        private static string GetHash(string input)
         {
-            var hashBytes = System.Security.Cryptography.SHA256.HashData(Encoding.UTF8.GetBytes(input));
-            return Convert.ToHexString(hashBytes).ToLower();
+            return HashSum.GetSha256(input.ToLowerInvariant().Replace("\\", "/"));
         }
     }
 }

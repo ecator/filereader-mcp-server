@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Protocol;
 using ModelContextProtocol.Server;
 using System.ComponentModel;
+using System.Text.RegularExpressions;
 
 
 namespace FileReaderMcpServer
@@ -47,6 +48,28 @@ namespace FileReaderMcpServer
                     Console.Error.WriteLine($"Error: Unsupported LANGUAGE environment variable value '{langEnvRaw}'. Allowed values are {string.Join(",",GlobalState.ALLOWED_LANGUAGE)}.");
                     Environment.Exit(1);
                 }
+            }
+
+            var timeoutEnvRaw = Environment.GetEnvironmentVariable("TIMEOUT");
+            if (!string.IsNullOrWhiteSpace(timeoutEnvRaw))
+            {
+                if (int.TryParse(timeoutEnvRaw, out int timeoutVal) && timeoutVal > 0)
+                {
+                    GlobalState.Timeout = timeoutVal;
+                }
+                else
+                {
+                    Console.Error.WriteLine($"Warning: Invalid TIMEOUT value '{timeoutEnvRaw}'. Must be a positive integer. Using default ({GlobalState.Timeout}s).");
+                }
+            }
+
+            var excludeEnvRaw = Environment.GetEnvironmentVariable("EXCLUDE");
+            if (!string.IsNullOrWhiteSpace(excludeEnvRaw))
+            {
+                GlobalState.ExcludePattern = new Regex(
+                    excludeEnvRaw,
+                    RegexOptions.IgnoreCase | RegexOptions.Compiled
+                );
             }
 
             var builder = Host.CreateApplicationBuilder(args);

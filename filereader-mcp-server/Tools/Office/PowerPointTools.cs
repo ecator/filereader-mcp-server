@@ -1,4 +1,4 @@
-﻿using ModelContextProtocol;
+using ModelContextProtocol;
 using ModelContextProtocol.Server;
 using System;
 using System.Buffers;
@@ -12,6 +12,7 @@ using PowerPoint = Microsoft.Office.Interop.PowerPoint;
 using Microsoft.Office.Core;
 using Newtonsoft.Json;
 using FileReaderMcpServer.Search;
+using FileReaderMcpServer.Utilities;
 
 namespace FileReaderMcpServer.Tools.Office;
 
@@ -27,14 +28,14 @@ public static class PowerPointTools
         var data = new StringBuilder();
         var count = 0;
         data.AppendLine();
-        var checkedFile = Validation.FileChecker.CheckFile(file);
+        FileChecker.CheckPowerPointFile(file);
         using (var session = new PowerPointSession())
         {
-            var docs = CacheReader.ReadPowerPointFileDocument(session, checkedFile);
+            var docs = CacheReader.ReadPowerPointFileDocument(session, file);
 
             count = docs.Count;
         }
-        data.Insert(0, $"Total `{count}` slides in the PowerPoint file `{checkedFile}`.");
+        data.Insert(0, $"Total `{count}` slides in the PowerPoint file `{file}`.");
         return data.ToString();
     }
 
@@ -44,10 +45,10 @@ public static class PowerPointTools
         , [Description("The slide number to read.")] int? count = 10)
     {
         var data = "";
-        var checkedFile = Validation.FileChecker.CheckFile(file);
+        FileChecker.CheckPowerPointFile(file);
         using (var session = new PowerPointSession())
         {
-            var docs = CacheReader.ReadPowerPointFileDocument(session, checkedFile);
+            var docs = CacheReader.ReadPowerPointFileDocument(session, file);
 
             var pages = docs.Select(doc => doc.Content).ToList();
             data = string.Join(Environment.NewLine, pages.Skip(fromSlide - 1).Take(count.Value));
@@ -85,8 +86,18 @@ public static class PowerPointTools
 
             foreach (var file in files)
             {
-                var checkedFile = Validation.FileChecker.CheckFile(file);
-                var docs = CacheReader.ReadPowerPointFileDocument(session, checkedFile);
+                if (totalCount >= max) break;
+                try
+                {
+                    FileChecker.CheckPowerPointFile(file);
+
+                }
+                catch (Exception ex)
+                {
+                    data.AppendLine($"Error checking file `{file}`: {ex.Message}");
+                    continue;
+                }
+                var docs = CacheReader.ReadPowerPointFileDocument(session, file);
                 count = 0;
                 foundData.Clear();
                 foundData.AppendLine();
@@ -104,18 +115,14 @@ public static class PowerPointTools
                         totalCount++;
                         count++;
                         line[0] = doc.Metadata["SlideNumber"].ToString();
-                        line[1] = session.EscapeMarkdownTableValue(doc.Content);
+                        line[1] = MarkdownHelper.EscapeMarkdownTableValue(doc.Content);
                         foundData.AppendLine(string.Join("|", line));
-                        if (totalCount >= max)
-                        {
-                            break;
-                        }
 
                     }
                 }
                 if (count > 0)
                 {
-                    foundData.Insert(0, $"`{count}` results in `{checkedFile}`:");
+                    foundData.Insert(0, $"`{count}` results in `{file}`:");
                     data.AppendLine(foundData.ToString());
                 }
             }

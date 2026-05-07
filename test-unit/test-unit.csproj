@@ -12,6 +12,8 @@
     <PackageReference Include="MeCab.DotNet" Version="1.2.0" />
     <PackageReference Include="MSTest" Version="4.0.2" />
     <PackageReference Include="jieba.NET" Version="0.42.2" GeneratePathProperty="True" />
+    <!-- Explicit System.Drawing.Common to override transitive vulnerable version -->
+    <PackageReference Include="System.Drawing.Common" Version="10.0.7" />
   </ItemGroup>
 
   <ItemGroup>

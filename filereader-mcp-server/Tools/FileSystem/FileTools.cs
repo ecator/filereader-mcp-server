@@ -3,6 +3,7 @@ using ModelContextProtocol.Server;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -12,9 +13,9 @@ using FileReaderMcpServer.Tools;
 using FileReaderMcpServer.Search;
 using SearchDocument = FileReaderMcpServer.Search.Document;
 using Microsoft.Office.Interop.Word;
-using FileReaderMcpServer.Validation;
 using Newtonsoft.Json;
 using FileReaderMcpServer.Tools.Office;
+using FileReaderMcpServer.Utilities;
 namespace FileReaderMcpServer.Tools.FileSystem;
 
 [McpServerToolType]
@@ -55,7 +56,7 @@ public static class FileTools
         [Description("Whether to search recursively in all subdirectories.")] bool recurse = false,
         [Description("The maximum number of files to return.")] int top = 10)
     {
-        directory = FileChecker.CheckDirectory(directory);
+        FileChecker.CheckDirectory(directory);
 
         if (extensions == null || extensions.Length == 0)
         {
@@ -162,7 +163,7 @@ public static class FileTools
         [Description("The base directory path to start listing from.")] string directory,
         [Description("The maximum depth of the directory tree to output.")] int maxDepth = 5)
     {
-        directory = FileChecker.CheckDirectory(directory);
+        FileChecker.CheckDirectory(directory);
 
         var sb = new StringBuilder();
         sb.AppendLine(directory);
@@ -207,7 +208,7 @@ public static class FileTools
         [Description("Whether to search recursively in all subdirectories.")] bool recurse = false,
         [Description("The maximum number of matched documents to return.")] int top = 10)
     {
-        directory = FileChecker.CheckDirectory(directory);
+        FileChecker.CheckDirectory(directory);
 
         if (extensions == null || extensions.Length == 0)
         {
@@ -219,6 +220,7 @@ public static class FileTools
         var excelExtSet = new HashSet<string>(GlobalState.ALLOWED_EXTENSIONS_EXCEL, StringComparer.OrdinalIgnoreCase);
         var wordExtSet = new HashSet<string>(GlobalState.ALLOWED_EXTENSIONS_WORD, StringComparer.OrdinalIgnoreCase);
         var pptExtSet = new HashSet<string>(GlobalState.ALLOWED_EXTENSIONS_PPT, StringComparer.OrdinalIgnoreCase);
+        var pdfExtSet = new HashSet<string>(GlobalState.ALLOWED_EXTENSIONS_PDF, StringComparer.OrdinalIgnoreCase);
         var textExtSet = new HashSet<string>(GlobalState.ALLOWED_EXTENSIONS_TEXT, StringComparer.OrdinalIgnoreCase);
 
         // Collect matched files
@@ -241,15 +243,26 @@ public static class FileTools
 
         // Load documents (one per page/sheet/slide) from each file
         var allDocs = new List<SearchDocument>();
+        bool timedOut = false;
 
         ExcelSession? excelSession = null;
         WordSession? wordSession = null;
         PowerPointSession? pptSession = null;
 
+        var stopwatch = Stopwatch.StartNew();
+        var timeoutSeconds = GlobalState.Timeout;
+
         try
         {
             foreach (var file in matchedFiles)
             {
+                // Check timeout before processing each file
+                if (stopwatch.Elapsed.TotalSeconds >= timeoutSeconds)
+                {
+                    timedOut = true;
+                    break;
+                }
+
                 var ext = Path.GetExtension(file).TrimStart('.').ToLowerInvariant();
                 try
                 {
@@ -269,6 +282,11 @@ public static class FileTools
                     {
                         pptSession ??= new PowerPointSession();
                         var docs = CacheReader.ReadPowerPointFileDocument(pptSession, file);
+                        allDocs.AddRange(docs);
+                    }
+                    else if (pdfExtSet.Contains(ext))
+                    {
+                        var docs = CacheReader.ReadPdfFileDocument(file);
                         allDocs.AddRange(docs);
                     }
                     else if (textExtSet.Contains(ext))
@@ -331,6 +349,10 @@ public static class FileTools
 
         // Build output table
         var sb = new StringBuilder();
+        if (timedOut)
+        {
+            sb.AppendLine($"[WARNING] File loading timed out after {timeoutSeconds} seconds. Only {allDocs.Count} documents from {matchedFiles.Count} files were indexed; results may be incomplete.");
+        }
         sb.AppendLine($"There are {resultsToReturn.Count} matched documents in {directory}:");
         if (resultsToReturn.Count > 0)
         {
