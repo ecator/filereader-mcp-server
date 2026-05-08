@@ -96,7 +96,6 @@ namespace FileReaderMcpServer.Search
 
         public static List<Document> ReadExcelFileDocument(ExcelSession session, string file)
         {
-            file = file.ToLowerInvariant();
             var key = GetKeyFromFilePath(file);
             var fileName = GetHash(file) + ".json";
             var cachePath = Path.Combine(EnsureAndGetCacheFolder(key), fileName);
@@ -188,7 +187,6 @@ namespace FileReaderMcpServer.Search
 
         public static List<Document> ReadWordFileDocument(WordSession session, string file)
         {
-            file = file.ToLowerInvariant();
             var key = GetKeyFromFilePath(file);
             var fileName = GetHash(file) + ".json";
             var cachePath = Path.Combine(EnsureAndGetCacheFolder(key), fileName);
@@ -248,7 +246,6 @@ namespace FileReaderMcpServer.Search
 
         public static List<Document> ReadPdfFileDocument(string file)
         {
-            file = file.ToLowerInvariant();
             var key = GetKeyFromFilePath(file);
             var fileName = GetHash(file) + ".json";
             var cachePath = Path.Combine(EnsureAndGetCacheFolder(key), fileName);
@@ -309,7 +306,6 @@ namespace FileReaderMcpServer.Search
 
         public static List<Document> ReadPowerPointFileDocument(PowerPointSession session, string file)
         {
-            file = file.ToLowerInvariant();
             var key = GetKeyFromFilePath(file);
             var fileName = GetHash(file) + ".json";
             var cachePath = Path.Combine(EnsureAndGetCacheFolder(key), fileName);
