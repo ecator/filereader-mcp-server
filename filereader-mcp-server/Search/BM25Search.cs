@@ -39,7 +39,7 @@ public class BM25Search
         }
     }
 
-    public List<Document> Search(List<string> keywords, int top = 10)
+    public List<Document> Search(List<string> keywords)
     {
         var scores = new List<(Document Item, double Score)>();
 
@@ -52,7 +52,7 @@ public class BM25Search
             }
         }
 
-        return scores.OrderByDescending(s => s.Score).Take(top).Select(s => s.Item).ToList();
+        return scores.OrderByDescending(s => s.Score).Select(s => s.Item).ToList();
     }
 
     private double Score(List<string> keywords, int docIndex)

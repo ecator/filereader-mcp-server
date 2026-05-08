@@ -1,5 +1,12 @@
+using ElBruno.BM25;
+using FileReaderMcpServer.Search;
+using FileReaderMcpServer.Tools;
+using FileReaderMcpServer.Tools.Office;
+using FileReaderMcpServer.Utilities;
+using Microsoft.Office.Interop.Word;
 using ModelContextProtocol;
 using ModelContextProtocol.Server;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -9,13 +16,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Excel = Microsoft.Office.Interop.Excel;
-using FileReaderMcpServer.Tools;
-using FileReaderMcpServer.Search;
 using SearchDocument = FileReaderMcpServer.Search.Document;
-using Microsoft.Office.Interop.Word;
-using Newtonsoft.Json;
-using FileReaderMcpServer.Tools.Office;
-using FileReaderMcpServer.Utilities;
 namespace FileReaderMcpServer.Tools.FileSystem;
 
 [McpServerToolType]
@@ -48,7 +49,7 @@ public static class FileTools
         return result;
     }
 
-    [McpServerTool(Name = "list_files"), Description("List files in a directory with optional keyword filtering and BM25 search on file and directory name.\nWhen the returned results are insufficient, keyword match will be used as a fallback.")]
+    [McpServerTool(Name = "list_files"), Description("List files in a directory with optional keywords filtering and BM25 search on file and directory name.\nWhen the returned results are insufficient, keyword match will be used as a fallback.")]
     public static string ListFiles(
         [Description("The directory path to list files from.")] string directory,
         [Description("Optional array of keywords to filter and rank files by file and directory name. If not specified, all files will be included.")] string[]? keywords = null,
@@ -102,7 +103,8 @@ public static class FileTools
             }
         }
 
-        List<string> resultsToReturn = new List<string>();
+        var resultsToReturn = new List<string>();
+        var searchResults = new List<SearchDocument>();
         if (keywords == null || keywords.Length == 0)
         {
             resultsToReturn = relativePaths.Take(top).ToList();
@@ -123,15 +125,18 @@ public static class FileTools
                 docs.Add(doc);
             }
 
+            // BM25 search on document content tokens
             var bm25Search = new BM25Search(docs);
-            var queryTokens = keywords.Select(kw => kw.ToLowerInvariant()).ToList();
-            var searchResults = bm25Search.Search(queryTokens, top);
-            resultsToReturn = searchResults.Select(d => d.FilePath).ToList();
+            var queryTokens = keywords.Select(kw => Tokenizer.Tokenize(kw, GlobalState.Language)).SelectMany(t => t).ToList();
+            searchResults = bm25Search.Search(queryTokens);
+            resultsToReturn = searchResults.Take(top).Select(d => d.FilePath).ToList();
+
+            // Fallback: keyword match on content if not enough results
             if (resultsToReturn.Count < top)
             {
                 foreach (var doc in docs)
                 {
-                    foreach (var kw in queryTokens)
+                    foreach (var kw in keywords)
                     {
                         if (doc.FilePath.Contains(kw, StringComparison.OrdinalIgnoreCase) && !resultsToReturn.Contains(doc.FilePath))
                         {
@@ -149,7 +154,15 @@ public static class FileTools
 
 
         var sb = new StringBuilder();
-        sb.AppendLine($"There are {resultsToReturn.Count} matched files in {directory}:");
+        if (searchResults.Count > top)
+        {
+            sb.AppendLine($"There are {searchResults.Count} matched files in '{directory}' but only the top {top} are shown:");
+        }
+        else
+        {
+            sb.AppendLine($"There are {resultsToReturn.Count} matched files in '{directory}':");
+        }
+
         for (int i = 0; i < resultsToReturn.Count; i++)
         {
             sb.AppendLine($"{i + 1}. {resultsToReturn[i]}");
@@ -309,10 +322,10 @@ public static class FileTools
         }
 
         // BM25 search on document content tokens
-        var queryTokens = keywords.Select(kw => kw.ToLowerInvariant()).ToList();
+        var queryTokens = keywords.Select(kw => Tokenizer.Tokenize(kw, GlobalState.Language)).SelectMany(t => t).ToList();
         var bm25Search = new BM25Search(allDocs);
-        var searchResults = bm25Search.Search(queryTokens, top);
-        var resultsToReturn = searchResults.ToList();
+        var searchResults = bm25Search.Search(queryTokens);
+        var resultsToReturn = searchResults.Take(top).ToList();
 
         // Fallback: keyword match on content if not enough results
         if (resultsToReturn.Count < top)
@@ -326,7 +339,7 @@ public static class FileTools
                 var docKey = $"{doc.FilePath}#{GetPageSheet(doc)}";
                 if (resultPaths.Contains(docKey)) continue;
 
-                foreach (var kw in queryTokens)
+                foreach (var kw in keywords)
                 {
                     var ext = Path.GetExtension(doc.FilePath).TrimStart('.').ToLowerInvariant();
                     var content = doc.Content;
@@ -353,7 +366,15 @@ public static class FileTools
         {
             sb.AppendLine($"[WARNING] File loading timed out after {timeoutSeconds} seconds. Only {allDocs.Count} documents from {matchedFiles.Count} files were indexed; results may be incomplete.");
         }
-        sb.AppendLine($"There are {resultsToReturn.Count} matched documents in {directory}:");
+        if(searchResults.Count > top)
+        {
+            sb.AppendLine($"There are {searchResults.Count} matched documents in '{directory}' but only the top {top} are shown:");
+        }
+        else
+        {
+            sb.AppendLine($"There are {resultsToReturn.Count} matched documents in '{directory}':");
+        }
+        
         if (resultsToReturn.Count > 0)
         {
             sb.AppendLine("No|File|Page/Sheet");
