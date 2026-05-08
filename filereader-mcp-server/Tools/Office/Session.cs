@@ -106,13 +106,6 @@ public abstract class Session<TApplication> : IDisposable where TApplication : c
             // Release managed resources here if any
         }
 
-        if (_disposed) return;
-
-        if (disposing)
-        {
-            // Release managed resources here if any
-        }
-
         // Release unmanaged resources (COM objects)
         if (Application != null)
         {
@@ -125,10 +118,12 @@ public abstract class Session<TApplication> : IDisposable where TApplication : c
                     dynamicApp.DisplayAlerts = false;
                     var wks = dynamicApp.Workbooks as Excel.Workbooks;
                     RegisterComObject(wks);
-                    for (var i = 1; i <= wks.Count; i++)
+                    // Iterate backwards to safely close all workbooks
+                    for (var i = wks.Count; i >= 1; i--)
                     {
                         var wk = wks[i];
                         RegisterComObject(wk);
+                        try { wk.Saved = true; } catch { } // Mark as saved to be double sure
                         wk.Close(false);
                     }
                 }
@@ -137,23 +132,26 @@ public abstract class Session<TApplication> : IDisposable where TApplication : c
                     dynamicApp.DisplayAlerts = Word.WdAlertLevel.wdAlertsNone;
                     var docs = dynamicApp.Documents as Word.Documents;
                     RegisterComObject(docs);
-                    for (var i = 1; i <= docs.Count; i++)
+                    // Iterate backwards to safely close all documents
+                    for (var i = docs.Count; i >= 1; i--)
                     {
                         var doc = docs[i];
                         RegisterComObject(doc);
+                        try { doc.Saved = true; } catch { } // Mark as saved to be double sure
                         doc.Close(false);
                     }
-
                 }
                 else if (dynamicApp is PowerPoint.Application)
                 {
                     dynamicApp.DisplayAlerts = PowerPoint.PpAlertLevel.ppAlertsNone;
                     var prs = dynamicApp.Presentations as PowerPoint.Presentations;
                     RegisterComObject(prs);
-                    for (var i = 1; i <= prs.Count; i++)
+                    // Iterate backwards to safely close all presentations
+                    for (var i = prs.Count; i >= 1; i--)
                     {
                         var pr = prs[i];
                         RegisterComObject(pr);
+                        try { pr.Saved = (dynamic)(-1); } catch { } // msoTrue is -1
                         pr.Close();
                     }
                 }
@@ -176,11 +174,6 @@ public abstract class Session<TApplication> : IDisposable where TApplication : c
                 _comObjectsToRelease.Clear();
             }
         }
-
-        // Due to performance issues, commenting out explicit GC calls.
-        // Explicitly call GC to clean up any remaining Runtime Callable Wrappers (RCWs)
-        //GC.Collect();
-        //GC.WaitForPendingFinalizers();
 
         _disposed = true;
     }
