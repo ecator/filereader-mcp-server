@@ -22,6 +22,7 @@
   <ItemGroup>
     <PackageReference Include="ElBruno.BM25" Version="0.5.0" />
     <PackageReference Include="jieba.NET" Version="0.42.2" GeneratePathProperty="true" />
+    <PackageReference Include="Lucene.Net.Analysis.Common" Version="4.8.0-beta00016" />
     <PackageReference Include="MeCab.DotNet" Version="1.2.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.7" />
     <PackageReference Include="ModelContextProtocol" Version="1.2.0" />

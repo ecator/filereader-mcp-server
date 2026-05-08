@@ -13,7 +13,7 @@ Please answer in the same language as the user's query, but strictly use English
   - Content extraction from Word (`.docx`, `.doc`, `.docm`, `.rtf`), Excel (`.xlsx`, `.xls`, `.xlsm`), PowerPoint (`.ppt`, `.pptm`, `.pptx`), PDF, and Text/Markdown files.
   - Full-text search across multiple files using **BM25 ranking**.
   - File system navigation within allowed directories.
-  - Multi-language support (English, Chinese, Japanese) for tokenization (using Jieba.NET and MeCab.DotNet).
+  - Multi-language support (English, Chinese, Japanese) for tokenization (using Lucene.NET, Jieba.NET and MeCab.DotNet).
 - **Architecture:** 
   - Standard MCP server using Stdio transport.
   - Tools are automatically discovered from the assembly using the `[McpServerTool]` attribute.
