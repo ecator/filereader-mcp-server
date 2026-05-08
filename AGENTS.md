@@ -48,7 +48,7 @@ The project uses MSTest for unit testing.
 ```powershell
 dotnet test
 ```
-Tests are located in the `test-unit` project and cover search tokenization, BM25 ranking, and tool logic.
+Tests are located in the `test-unit` project and cover search tokenization, BM25 ranking, and tool logic. All test classes should inherit from `TestBase` to access common properties (like `TestDataDirectory`) and ensure proper initialization of `GlobalState`.
 
 ## Key Tools
 
