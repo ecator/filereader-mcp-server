@@ -12,7 +12,7 @@
 
 # Overview
 
-The MCP Server for search/read Excel, Word, PowerPoint, PDF, md/txt files.
+The MCP Server for search/read Excel, Word, PowerPoint, PDF, Text files.
 
 You must install Office 2016 and later versions to use this MCP server.
 
