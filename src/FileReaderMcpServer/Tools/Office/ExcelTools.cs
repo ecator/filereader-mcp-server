@@ -23,8 +23,8 @@ public static class ExcelTools
 {
     private static readonly ISerializer _yamlSerializer = new SerializerBuilder().Build();
 
-    [McpServerTool(Name = "excel_get_sheets"), Description("Get all the sheet names of the specified Excel file.")]
-    public static string GetSheets([Description("The Excel file.")] string file)
+    [McpServerTool(Name = "get_excel_sheets"), Description("Get all the sheet names of the specified Excel file.")]
+    public static string GetSheets([Description("The absolute path of the Excel file.")] string file)
     {
         var data = new StringBuilder();
         var count = 0;
@@ -45,13 +45,13 @@ public static class ExcelTools
 
 
 
-    [McpServerTool(Name = "excel_read"), Description("Read the value of a cell or a range of cells from the specified worksheet in YAML format.\nIf a cell is empty, it will not be included in the returned result set.")]
-    public static string Read([Description("The path of the Excel file.")] string file
+    [McpServerTool(Name = "read_excel"), Description("Read the value of a cell or a range of cells from the specified worksheet in YAML format.\nIf a cell is empty, it will not be included in the returned result set.")]
+    public static string Read([Description("The absolute path of the Excel file.")] string file
         , [Description("The sheet name of the Excel file.")] string sheetName
-        , [Description("The first column as a letter.(such as A)")] string startColumn = "A"
+        , [Description("The starting column letter (e.g., 'A').")] string startColumn = "A"
         , [Description("The first row number.")] int startRow = 1
-        , [Description("The last column as a letter.(such as Z) If empty, then use xlToRight relative to startColumn")] string? endColumn = null
-        , [Description("The last row number. If empty, then use xlDown relative to startRow")] int? endRow = null)
+        , [Description("The ending column letter (e.g., 'Z'). If empty, reads to the last used column in the row.")] string? endColumn = null
+        , [Description("The last row number to read. If empty, reads to the last used row in the column.")] int? endRow = null)
     {
         var allValues = new Dictionary<string, object>();
         var values = new Dictionary<string, object>();
@@ -93,8 +93,8 @@ public static class ExcelTools
 
         return _yamlSerializer.Serialize(values);
     }
-    [McpServerTool(Name = "excel_read_used_range"), Description("Read the value of used range of cells from the specified worksheet in YAML format.\nIf a cell is empty, it will not be included in the returned result set.")]
-    public static string ReadUsedRange([Description("The path of the Excel file.")] string file
+    [McpServerTool(Name = "read_excel_used_range"), Description("Read the value of used range of cells from the specified worksheet in YAML format.\nIf a cell is empty, it will not be included in the returned result set.")]
+    public static string ReadUsedRange([Description("The absolute path of the Excel file.")] string file
         , [Description("The sheet name of the Excel file.")] string sheetName)
     {
         var values = new Dictionary<string, object>();
@@ -122,8 +122,8 @@ public static class ExcelTools
         return _yamlSerializer.Serialize(values);
     }
 
-    [McpServerTool(Name = "excel_grep_files"), Description("Find value from Excel files.")]
-    public static string Find([Description("The list of full path of Excel files that need to be searched for.")] string[] files
+    [McpServerTool(Name = "grep_excel_files"), Description("Search for a regex pattern across cells in multiple Excel files.")]
+    public static string Find([Description("A list of absolute paths to Excel files to search.")] string[] files
     , [Description("The regular expression pattern to match against each cell.")] string pattern
     , [Description("The maximum number of matched cells to return across all files.")] int max = 1000)
     {

@@ -15,8 +15,8 @@ namespace FileReaderMcpServer.Tools.Pdf;
 public static class PdfTools
 {
 
-    [McpServerTool(Name = "pdf_get_page_count"), Description("Get the total number of pages in a PDF file.")]
-    public static string GetPageCount([Description("The path of the PDF file.")] string file)
+    [McpServerTool(Name = "get_pdf_pages"), Description("Get the total number of pages in a PDF file.")]
+    public static string GetPageCount([Description("The absolute path of the PDF file.")] string file)
     {
         var data = new StringBuilder();
         var count = 0;
@@ -28,8 +28,8 @@ public static class PdfTools
         return data.ToString();
     }
 
-    [McpServerTool(Name = "pdf_read"), Description("Read text content from a PDF file, starting from a specific page.")]
-    public static string Read([Description("The path of the PDF file.")] string file
+    [McpServerTool(Name = "read_pdf"), Description("Read text content from a PDF file, starting from a specific page.")]
+    public static string Read([Description("The absolute path of the PDF file.")] string file
         , [Description("The starting page number (1-indexed) to read.")] int fromPage = 1
         , [Description("The number of pages to read.")] int? count = 10
         )
@@ -42,8 +42,8 @@ public static class PdfTools
         return data;
     }
 
-    [McpServerTool(Name = "pdf_grep_files"), Description("Search for a regex pattern across multiple PDF files, returning matched pages.")]
-    public static string Find([Description("The list of full path of PDF files that need to be searched for.")] string[] files
+    [McpServerTool(Name = "grep_pdf_files"), Description("Search for a regex pattern across multiple PDF files, returning matched pages.")]
+    public static string Find([Description("A list of absolute paths to PDF files to search.")] string[] files
     , [Description("The regular expression pattern to match against each page.")] string pattern
     , [Description("The maximum number of matched pages to return across all files.")] int max = 100)
     {

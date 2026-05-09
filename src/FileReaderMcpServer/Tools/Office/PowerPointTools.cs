@@ -21,8 +21,8 @@ public static class PowerPointTools
 
 {
 
-    [McpServerTool(Name = "powerpoint_get_slide_count"), Description("Get all the number of the slides of the specified PowerPoint file.")]
-    public static string GetSlideCount([Description("The path of the PowerPoint file.")] string file
+    [McpServerTool(Name = "get_ppt_slides"), Description("Get the total number of slides in a PowerPoint file.")]
+    public static string GetSlideCount([Description("The absolute path of the PowerPoint file.")] string file
        )
     {
         var data = new StringBuilder();
@@ -39,10 +39,10 @@ public static class PowerPointTools
         return data.ToString();
     }
 
-    [McpServerTool(Name = "powerpoint_read"), Description("Get the text content of the specified PowerPoint file.")]
-    public static string Read([Description("The path of the PowerPoint file.")] string file
+    [McpServerTool(Name = "read_ppt"), Description("Read text content from a PowerPoint file, starting from a specific slide.")]
+    public static string Read([Description("The absolute path of the PowerPoint file.")] string file
         , [Description("The starting slide number to read.")] int fromSlide = 1
-        , [Description("The slide number to read.")] int? count = 10)
+        , [Description("The number of slides to read.")] int? count = 10)
     {
         var data = "";
         FileChecker.CheckPowerPointFile(file);
@@ -56,8 +56,8 @@ public static class PowerPointTools
         return data;
     }
 
-    [McpServerTool(Name = "powerpoint_grep_files"), Description("Find value from PowerPoint files.")]
-    public static string Find([Description("The list of full path of PowerPoint files that need to be searched for.")] string[] files
+    [McpServerTool(Name = "grep_ppt_files"), Description("Search for a regex pattern across multiple PowerPoint files, returning matched slides.")]
+    public static string Find([Description("A list of absolute paths to PowerPoint files to search.")] string[] files
     , [Description("The regular expression pattern to match against each slide.")] string pattern
     , [Description("The maximum number of matched slides to return across all files.")] int max = 100)
     {

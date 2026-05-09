@@ -15,7 +15,7 @@ namespace FileReaderMcpServer.Tools.Text;
 [McpServerToolType]
 public static class TextTools
 {
-    [McpServerTool(Name = "text_read"), Description("Read content from a text file, optionally from a specific line and for a specific number of lines.")]
+    [McpServerTool(Name = "read_text"), Description("Read content from a text file, optionally from a specific line and for a specific number of lines.")]
     public static string Read(
         [Description("The absolute path of the text file to read.")] string file,
         [Description("The starting line number (1-indexed).")] int startLine = 1,
@@ -47,7 +47,7 @@ public static class TextTools
         }
     }
 
-    [McpServerTool(Name = "text_get_lines"), Description("Get the number of lines in a text file.")]
+    [McpServerTool(Name = "get_text_lines"), Description("Get the total number of lines in a text file.")]
     public static string GetLines(
         [Description("The absolute path of the text file.")] string file)
     {
@@ -66,9 +66,9 @@ public static class TextTools
         }
     }
 
-    [McpServerTool(Name = "text_grep_files"), Description("Search for a regex pattern in multiple text files.")]
+    [McpServerTool(Name = "grep_text_files"), Description("Search for a regex pattern across lines in multiple text files.")]
     public static string GrepFiles(
-        [Description("The list of text files to search.")] string[] files,
+        [Description("A list of absolute paths to text files to search.")] string[] files,
         [Description("The regular expression pattern to match against each line.")] string pattern,
         [Description("The maximum number of matched lines to return across all files.")] int max = 1000)
     {

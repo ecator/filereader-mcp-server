@@ -73,7 +73,7 @@ public static class FileTools
         return sb.ToString();
     }
 
-    [McpServerTool(Name = "list_files"), Description("List files in a directory with optional keywords filtering and BM25 search on file and directory name.\nWhen the returned results are insufficient, keyword match will be used as a fallback.")]
+    [McpServerTool(Name = "list_files"), Description("List and rank files in a directory using BM25 search on names, with keyword fallback.")]
     public static string ListFiles(
         [Description("The directory path to list files from.")] string directory,
         [Description("Optional array of keywords to filter and rank files by file and directory name. If not specified, all files will be included.")] string[]? keywords = null,
@@ -237,7 +237,7 @@ public static class FileTools
         }
     }
 
-    [McpServerTool(Name = "search_files"), Description("Search files in a directory by their content using BM25 ranking.\nWhen BM25 results are insufficient, keyword match on file content is used as fallback.\nReturns a table showing the file path and the specific page/sheet where the keywords were found.")]
+    [McpServerTool(Name = "search_files"), Description("Full-text search across files in a directory using BM25 ranking with keyword fallback.")]
     public static string SearchFiles(
         [Description("The directory path to search files in.")] string directory,
         [Description("Keywords to match against file content.")] string[] keywords,

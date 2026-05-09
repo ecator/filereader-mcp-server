@@ -20,8 +20,8 @@ public static class WordTools
 
 {
 
-    [McpServerTool(Name = "word_get_page_count"), Description("Get all the number of the pages of the specified Word file.")]
-    public static string GetPageCount([Description("The path of the Word file.")] string file)
+    [McpServerTool(Name = "get_word_pages"), Description("Get the total number of pages in a Word document.")]
+    public static string GetPageCount([Description("The absolute path of the Word file.")] string file)
     {
         var data = new StringBuilder();
         var count = 0;
@@ -37,10 +37,10 @@ public static class WordTools
         return data.ToString();
     }
 
-    [McpServerTool(Name = "word_read"), Description("Get the text content of the specified Word file.")]
-    public static string Read([Description("The path of the Word file.")] string file
+    [McpServerTool(Name = "read_word"), Description("Read text content from a Word document, starting from a specific page.")]
+    public static string Read([Description("The absolute path of the Word file.")] string file
         , [Description("The starting page number (1-indexed) to read.")] int fromPage = 1
-        , [Description("The page number to read.")] int? count = 10
+        , [Description("The number of pages to read.")] int? count = 10
         )
     {
         var data = "";
@@ -55,8 +55,8 @@ public static class WordTools
         return data;
     }
 
-    [McpServerTool(Name = "word_grep_files"), Description("Find value from Word files.")]
-    public static string Find([Description("The list of full path of Word files that need to be searched for.")] string[] files
+    [McpServerTool(Name = "grep_word_files"), Description("Search for a regex pattern across multiple Word documents, returning matched pages.")]
+    public static string Find([Description("A list of absolute paths to Word files to search.")] string[] files
     , [Description("The regular expression pattern to match against each page.")] string pattern
     , [Description("The maximum number of matched pages to return across all files.")] int max = 100)
     {
