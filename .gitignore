@@ -4,5 +4,5 @@ obj/
 *.csproj.user
 *.pubxml.user
 TestResults/
-TestData/test.md
+tests/TestData/test.md
 win-x64/
