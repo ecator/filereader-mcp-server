@@ -99,7 +99,7 @@ public static class FileChecker
         return true;
     }
 
-    public static bool CheckTextFile(string file, bool throwError = true) => CheckFileExtension(file, GlobalState.ALLOWED_EXTENSIONS_TEXT, "Text/Markdown", throwError);
+    public static bool CheckTextFile(string file, bool throwError = true) => CheckFileExtension(file, GlobalState.ALLOWED_EXTENSIONS_TEXT, "Text", throwError);
 
     public static bool CheckExcelFile(string file, bool throwError = true) => CheckFileExtension(file, GlobalState.ALLOWED_EXTENSIONS_EXCEL, "Excel", throwError);
 

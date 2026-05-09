@@ -58,7 +58,7 @@ public static class TextTools
             var doc = CacheReader.ReadTextFileDocument(file);
             var content = doc.Content;
             var lineCount = content.Split('\n').Length;
-            return $"The file '{file}' has {lineCount} lines";
+            return $"The file '{file}' has {lineCount} lines.";
         }
         catch (Exception ex)
         {

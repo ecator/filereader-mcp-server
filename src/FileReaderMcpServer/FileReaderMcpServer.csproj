@@ -10,7 +10,7 @@
     <BuiltInComSupport>true</BuiltInComSupport>
     <AssemblyVersion>$(Version)</AssemblyVersion>
     <Title>$(AssemblyName)</Title>
-    <Version>0.2.1</Version>
+    <Version>0.3.0</Version>
     <Authors>Martin</Authors>
     <Company>Martin Cat</Company>
     <Copyright>© 2026 Martin Cat. All Rights Reserved.</Copyright>

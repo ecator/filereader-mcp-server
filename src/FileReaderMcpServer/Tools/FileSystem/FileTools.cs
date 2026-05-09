@@ -3,6 +3,7 @@ using FileReaderMcpServer.Search;
 using FileReaderMcpServer.Tools;
 using FileReaderMcpServer.Tools.Office;
 using FileReaderMcpServer.Utils;
+using JiebaNet.Segmenter.Common;
 using Microsoft.Office.Interop.Word;
 using ModelContextProtocol;
 using ModelContextProtocol.Server;
@@ -241,7 +242,7 @@ public static class FileTools
     public static string SearchFiles(
         [Description("The directory path to search files in.")] string directory,
         [Description("Keywords to match against file content.")] string[] keywords,
-        [Description("Optional array of file extensions to include (e.g. 'xlsx', 'txt'). If not specified, all allowed extensions will be included. You can call `list_allowed_extensions` to see all allowed extensions.")] string[]? extensions = null,
+        [Description("Optional array of file extensions to include (e.g. 'xlsx', 'txt'). If not specified, all allowed extensions will be included.")] string[]? extensions = null,
         [Description("Whether to search recursively in all subdirectories.")] bool recurse = false,
         [Description("The maximum number of matched documents to return.")] int top = 10)
     {
@@ -366,12 +367,12 @@ public static class FileTools
                 foreach (var kw in keywords)
                 {
                     var ext = Path.GetExtension(doc.FilePath).TrimStart('.').ToLowerInvariant();
-                    var content = doc.Content;
-                    if (excelExtSet.Contains(ext))
+                    var content = doc.Tokens.Join("");
+                    if (GlobalState.Language == "en")
                     {
-                        content = string.Join("\n",JsonConvert.DeserializeObject<Dictionary<string,object>>(doc.Content).Select(kv => kv.Value.ToString()));
-
+                        content = doc.Tokens.Join(" ");
                     }
+                    
                     if (content.Contains(kw, StringComparison.OrdinalIgnoreCase))
                     {
                         resultsToReturn.Add(doc);
@@ -384,12 +385,12 @@ public static class FileTools
             }
         }
 
-        // Build output table
+        // Build output csv
         var sb = new StringBuilder();
-        var tableBody = new List<List<object>>();
+        var csvBody = new List<List<object>>();
         if (timedOut)
         {
-            sb.AppendLine($"[WARNING] File loading timed out after {timeoutSeconds} seconds. Only {allDocs.Count} documents from {matchedFiles.Count} files were indexed; results may be incomplete.");
+            sb.AppendLine($"[WARNING] File loading timed out after {timeoutSeconds} seconds. Only {allDocs.Count} documents from {matchedFiles.Count} files were indexed, results may be incomplete.");
         }
         if(searchResults.Count > top)
         {
@@ -404,11 +405,13 @@ public static class FileTools
         {
             var doc = resultsToReturn[i];
             string pageSheet = GetPageSheet(doc);
-            tableBody.Add(new List<object> { i + 1, doc.FilePath, pageSheet });
+            csvBody.Add(new List<object> { i + 1, doc.FilePath, pageSheet });
         }
-        if (tableBody.Count > 0)
+        if (csvBody.Count > 0)
         {
-            sb.AppendLine(MarkdownHelper.MakeMarkdownTable(new List<string> { "No", "File", "Page/Sheet" }, tableBody));
+            sb.AppendLine("```csv");
+            sb.AppendLine(CsvHelper.MakeCsv(csvBody, new List<string> { "No", "File", "Page/Sheet" }));
+            sb.AppendLine("```");
         }
 
         return sb.ToString().TrimEnd();
