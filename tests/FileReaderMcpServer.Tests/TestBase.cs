@@ -5,16 +5,16 @@ using System.Text;
 using FileReaderMcpServer;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace TestUnit
+namespace FileReaderMcpServer.Tests
 {
     public class TestBase
     {
         public string AssemblyDirectory { get => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location); }
-        public string TestDataDirectory { get => Path.GetFullPath(Path.Combine(AssemblyDirectory, @"..\..\..\..\test-data")); }
+        public string TestDataDirectory { get => Path.GetFullPath(Path.Combine(AssemblyDirectory, @"..\..\..\..\TestData")); }
         public TestContext TestContext { get; set; }
 
         [TestInitialize]
-        public void Setup()
+        public void BaseSetup()
         {
             GlobalState.AllowedDirectories.Clear();
             GlobalState.AllowedDirectories.Add(TestDataDirectory);

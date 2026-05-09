@@ -386,6 +386,7 @@ public static class FileTools
 
         // Build output table
         var sb = new StringBuilder();
+        var tableBody = new List<List<object>>();
         if (timedOut)
         {
             sb.AppendLine($"[WARNING] File loading timed out after {timeoutSeconds} seconds. Only {allDocs.Count} documents from {matchedFiles.Count} files were indexed; results may be incomplete.");
@@ -399,17 +400,15 @@ public static class FileTools
             sb.AppendLine($"There are {resultsToReturn.Count} matched documents in '{directory}':");
         }
         
-        if (resultsToReturn.Count > 0)
-        {
-            sb.AppendLine("No|File|Page/Sheet");
-            sb.AppendLine("---|---|---");
-        }
         for (int i = 0; i < resultsToReturn.Count; i++)
         {
             var doc = resultsToReturn[i];
-            var ext = Path.GetExtension(doc.FilePath).TrimStart('.').ToLowerInvariant();
             string pageSheet = GetPageSheet(doc);
-            sb.AppendLine($"{i + 1}|{doc.FilePath}|{pageSheet}");
+            tableBody.Add(new List<object> { i + 1, doc.FilePath, pageSheet });
+        }
+        if (tableBody.Count > 0)
+        {
+            sb.AppendLine(MarkdownHelper.MakeMarkdownTable(new List<string> { "No", "File", "Page/Sheet" }, tableBody));
         }
 
         return sb.ToString().TrimEnd();

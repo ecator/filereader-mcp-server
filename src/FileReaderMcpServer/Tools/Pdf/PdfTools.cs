@@ -48,10 +48,7 @@ public static class PdfTools
     , [Description("The maximum number of matched pages to return across all files.")] int max = 100)
     {
         var data = new StringBuilder();
-        var foundData = new StringBuilder();
-        var line = new string[2];
         var totalCount = 0;
-        var count = 0;
         if (files == null || files.Length == 0)
         {
             throw new McpException("The full path list of the PDF file cannot be empty or null.");
@@ -82,31 +79,20 @@ public static class PdfTools
                 continue;
             }
             var docs = CacheReader.ReadPdfFileDocument(file);
-            count = 0;
-            foundData.Clear();
-            foundData.AppendLine();
+            var tableBody = new List<List<object?>>();
             foreach (var doc in docs)
             {
-
                 if (doc.Content != null && regex.IsMatch(doc.Content))
                 {
-                    if (count == 0)
-                    {
-                        foundData.AppendLine($"Page|Content");
-                        foundData.AppendLine($"---|---");
-                    }
                     totalCount++;
-                    count++;
-                    line[0] = doc.Metadata["PageNumber"].ToString();
-                    line[1] = MarkdownHelper.EscapeMarkdownTableValue(doc.Content);
-                    foundData.AppendLine(string.Join("|", line));
-
+                    tableBody.Add(new List<object?> { doc.Metadata["PageNumber"], doc.Content });
+                    if (totalCount >= max) break;
                 }
             }
-            if (count > 0)
+            if (tableBody.Count > 0)
             {
-                foundData.Insert(0, $"`{count}` results in `{file}`:");
-                data.AppendLine(foundData.ToString());
+                data.AppendLine($"`{tableBody.Count}` results in `{file}`:");
+                data.AppendLine(MarkdownHelper.MakeMarkdownTable(new List<string> { "Page", "Content" }, tableBody));
             }
         }
 

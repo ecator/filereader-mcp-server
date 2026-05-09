@@ -3,7 +3,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
 
-namespace TestUnit
+namespace FileReaderMcpServer.Tests
 {
     [TestClass]
     public sealed class TestTextTools : TestBase

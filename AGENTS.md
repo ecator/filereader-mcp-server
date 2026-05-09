@@ -48,7 +48,13 @@ The project uses MSTest for unit testing.
 ```powershell
 dotnet test
 ```
-Tests are located in the `test-unit` project and cover search tokenization, BM25 ranking, and tool logic. All test classes should inherit from `TestBase` to access common properties (like `TestDataDirectory`) and ensure proper initialization of `GlobalState`.
+Tests are located in the `tests/FileReaderMcpServer.Tests` project and cover search tokenization, BM25 ranking, and tool logic.
+
+### Test Conventions
+- **Directory Structure:** The test project must match the directory structure of the project being tested.
+- **Naming Convention:** Test files must be named using the `XxxTests.cs` pattern (where `Xxx` is the name of the class being tested).
+- **Method Naming:** Test methods must follow the `[MethodName]_[Scenario]_[ExpectedResult]` pattern.
+- **Base Class:** All test classes should inherit from `TestBase` to access common properties (like `TestDataDirectory`) and ensure proper initialization of `GlobalState`.
 
 ## Key Tools
 
@@ -73,8 +79,8 @@ Tests are located in the `test-unit` project and cover search tokenization, BM25
 
 #### Excel
 - `excel_get_sheets`: Get all sheet names of an Excel file.
-- `excel_read`: Read the value of a cell or range of cells from a specified worksheet.
-- `excel_read_used_range`: Read all non-empty cells in the used range of a specified worksheet.
+- `excel_read`: Read the value of a cell or range of cells from a specified worksheet (returns YAML).
+- `excel_read_used_range`: Read all non-empty cells in the used range of a specified worksheet (returns YAML).
 - `excel_grep_files`: Search for a regex pattern across cells in multiple Excel files.
 
 #### PowerPoint

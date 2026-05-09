@@ -1,12 +1,12 @@
-﻿using FileReaderMcpServer.Search;
+using FileReaderMcpServer.Search;
 
-namespace TestUnit
+namespace FileReaderMcpServer.Tests.Search
 {
     [TestClass]
-    public sealed class TestTokenizer: TestBase
+    public sealed class TokenizerTests: TestBase
     {
         [TestMethod]
-        public void TestTokenizerZh()
+        public void Tokenize_ChineseText_ReturnsExpectedTokens()
         {
             var content = @"我只是一个过客，我的名字叫Martin";
             var tokens = Tokenizer.Tokenize(content, "zh");
@@ -14,7 +14,7 @@ namespace TestUnit
             CollectionAssert.AreEqual(expectedTokens, tokens);
         }
         [TestMethod]
-        public void TestTokenizerJa()
+        public void Tokenize_JapaneseText_ReturnsExpectedTokens()
         {
             var content = @"私はただの通りすがりです。私の名前はMartinです。";
             var tokens = Tokenizer.Tokenize(content, "ja");
@@ -22,7 +22,7 @@ namespace TestUnit
             CollectionAssert.AreEqual(expectedTokens, tokens);
         }
         [TestMethod]
-        public void TestTokenizerEn()
+        public void Tokenize_EnglishText_ReturnsExpectedTokens()
         {
             var content = @"I am just a passerby";
             var tokens = Tokenizer.Tokenize(content, "en");

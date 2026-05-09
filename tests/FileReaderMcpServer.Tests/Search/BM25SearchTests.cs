@@ -1,13 +1,13 @@
-﻿using FileReaderMcpServer.Search;
+using FileReaderMcpServer.Search;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace TestUnit
+namespace FileReaderMcpServer.Tests.Search
 {
     [TestClass]
-    public sealed class TestBM25Search : TestBase
+    public sealed class BM25SearchTests : TestBase
     {
         private List<Document> LoadTestDocuments()
         {
@@ -33,7 +33,7 @@ namespace TestUnit
         }
 
         [TestMethod]
-        public void TestSearch_RealData_Ranking()
+        public void Search_WithRealData_ReturnsRankedResults()
         {
             var docs = LoadTestDocuments();
             Assert.IsNotEmpty(docs, "No test documents found in test-data/search");
@@ -52,7 +52,7 @@ namespace TestUnit
         }
 
         [TestMethod]
-        public void TestSearch_NoMatch()
+        public void Search_WithNonExistentKeyword_ReturnsEmptyList()
         {
             var docs = LoadTestDocuments();
             var searcher = new BM25Search(docs);
@@ -62,7 +62,7 @@ namespace TestUnit
         }
 
         [TestMethod]
-        public void TestSearch_EmptyQuery()
+        public void Search_WithEmptyQuery_ReturnsEmptyList()
         {
             var docs = LoadTestDocuments();
             var searcher = new BM25Search(docs);
@@ -72,7 +72,7 @@ namespace TestUnit
         }
 
         [TestMethod]
-        public void TestSearch_MultiWordQuery()
+        public void Search_WithMultiWordQuery_ReturnsRankedResults()
         {
             var docs = LoadTestDocuments();
             var searcher = new BM25Search(docs);
@@ -86,7 +86,7 @@ namespace TestUnit
         }
 
         [TestMethod]
-        public void TestSearch_ScoringConsistency()
+        public void Search_WithDifferentTermFrequencies_RanksHigherFrequencyFirst()
         {
             var docs = new List<Document>
             {
@@ -104,7 +104,7 @@ namespace TestUnit
         }
 
         [TestMethod]
-        public void TestSearch_MultiLanguage()
+        public void Search_WithMultipleLanguages_ReturnsCorrectMatches()
         {
             var docs = new List<Document>
             {

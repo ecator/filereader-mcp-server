@@ -3,6 +3,7 @@ using ModelContextProtocol;
 using ModelContextProtocol.Server;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using YamlDotNet.Serialization;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,6 +21,7 @@ namespace FileReaderMcpServer.Tools.Office;
 public static class ExcelTools
 
 {
+    private static readonly ISerializer _yamlSerializer = new SerializerBuilder().Build();
 
     [McpServerTool(Name = "excel_get_sheets"), Description("Get all the sheet names of the specified Excel file.")]
     public static string GetSheets([Description("The Excel file.")] string file)
@@ -43,7 +45,7 @@ public static class ExcelTools
 
 
 
-    [McpServerTool(Name = "excel_read"), Description("Read the value of a cell or a range of cells from the specified worksheet.\nIf a cell is empty, it will not be included in the returned result set.")]
+    [McpServerTool(Name = "excel_read"), Description("Read the value of a cell or a range of cells from the specified worksheet in YAML format.\nIf a cell is empty, it will not be included in the returned result set.")]
     public static string Read([Description("The path of the Excel file.")] string file
         , [Description("The sheet name of the Excel file.")] string sheetName
         , [Description("The first column as a letter.(such as A)")] string startColumn = "A"
@@ -89,9 +91,9 @@ public static class ExcelTools
             throw new McpException($"The specified sheet '{sheetName}' does not exist in the Excel file.");
         }
 
-        return JsonConvert.SerializeObject(values);
+        return _yamlSerializer.Serialize(values);
     }
-    [McpServerTool(Name = "excel_read_used_range"), Description("Read the value of used range of cells from the specified worksheet.\nIf a cell is empty, it will not be included in the returned result set.")]
+    [McpServerTool(Name = "excel_read_used_range"), Description("Read the value of used range of cells from the specified worksheet in YAML format.\nIf a cell is empty, it will not be included in the returned result set.")]
     public static string ReadUsedRange([Description("The path of the Excel file.")] string file
         , [Description("The sheet name of the Excel file.")] string sheetName)
     {
@@ -117,7 +119,7 @@ public static class ExcelTools
             throw new McpException($"The specified sheet '{sheetName}' does not exist in the Excel file.");
         }
 
-        return JsonConvert.SerializeObject(values);
+        return _yamlSerializer.Serialize(values);
     }
 
     [McpServerTool(Name = "excel_grep_files"), Description("Find value from Excel files.")]
@@ -126,10 +128,7 @@ public static class ExcelTools
     , [Description("The maximum number of matched cells to return across all files.")] int max = 1000)
     {
         var data = new StringBuilder();
-        var foundData = new StringBuilder();
-        var line = new string[3];
         var totalCount = 0;
-        var count = 0;
 
         if (files == null || files.Length == 0)
         {
@@ -162,9 +161,7 @@ public static class ExcelTools
                     continue;
                 }
                 var docs = CacheReader.ReadExcelFileDocument(session, file);
-                count = 0;
-                foundData.Clear();
-                foundData.AppendLine();
+                var tableBody = new List<List<object?>>();
                 foreach (var doc in docs)
                 {
                     var values = JsonConvert.DeserializeObject<Dictionary<string, object>>(doc.Content);
@@ -173,25 +170,17 @@ public static class ExcelTools
                     {
                         if (kvp.Value != null && regex.IsMatch(kvp.Value.ToString()))
                         {
-                            if (count == 0)
-                            {
-                                foundData.AppendLine($"Sheet|Address|Value");
-                                foundData.AppendLine($"---|---|---");
-                            }
                             totalCount++;
-                            count++;
-                            line[0] = doc.Metadata["SheetName"].ToString();
-                            line[1] = kvp.Key;
-                            line[2] = MarkdownHelper.EscapeMarkdownTableValue(Convert.ToString(kvp.Value));
-                            foundData.AppendLine(string.Join("|", line));
+                            tableBody.Add(new List<object?> { doc.Metadata["SheetName"], kvp.Key, kvp.Value });
+                            if (totalCount >= max) break;
                         }
-
                     }
+                    if (totalCount >= max) break;
                 }
-                if(count > 0)
+                if (tableBody.Count > 0)
                 {
-                    foundData.Insert(0, $"`{count}` results in `{file}`:");
-                    data.AppendLine(foundData.ToString());
+                    data.AppendLine($"`{tableBody.Count}` results in `{file}`:");
+                    data.AppendLine(MarkdownHelper.MakeMarkdownTable(new List<string> { "Sheet", "Address", "Value" }, tableBody));
                 }
             }
 
