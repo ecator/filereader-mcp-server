@@ -17,6 +17,9 @@
     <Description>Windows MCP Server for search/read Office/PDF/Text files</Description>
     <PackageProjectUrl>&gt;https://github.com/ecator/filereader-mcp-server</PackageProjectUrl>
     <FileVersion>$(Version)</FileVersion>
+    <PackageId>$(MSBuildProjectName)</PackageId>
+    <AssemblyName>filereader-mcp-server</AssemblyName>
+    <AssemblyTitle>$(MSBuildProjectName)</AssemblyTitle>
   </PropertyGroup>
 
   <ItemGroup>
@@ -29,6 +32,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="System.Drawing.Common" Version="10.0.7" />
     <PackageReference Include="UglyToad.PdfPig" Version="1.7.0-custom-5" />
+    <PackageReference Include="YamlDotNet" Version="17.1.0" />
   </ItemGroup>
 
   <ItemGroup>
