@@ -168,7 +168,7 @@ public static class ExcelTools
                     
                     foreach (var kvp in values)
                     {
-                        if (kvp.Value != null && regex.IsMatch(kvp.Value.ToString()))
+                        if (kvp.Value != null && regex.IsMatch(CharacterConverter.Normalize(kvp.Value.ToString())))
                         {
                             totalCount++;
                             tableBody.Add(new List<object?> { doc.Metadata["SheetName"], kvp.Key, kvp.Value });

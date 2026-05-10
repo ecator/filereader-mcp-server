@@ -6,6 +6,7 @@ using Lucene.Net.Analysis.En;
 using Lucene.Net.Analysis.TokenAttributes;
 using Lucene.Net.Util;
 using MeCab;
+using FileReaderMcpServer.Utils;
 
 namespace FileReaderMcpServer.Search;
 
@@ -25,7 +26,7 @@ public static class Tokenizer
     {
         if (string.IsNullOrWhiteSpace(text)) return new List<string>();
         language ??= GlobalState.Language;
-        
+        text = CharacterConverter.Normalize(text);
         if (language == "ja")
         {
             var tokens = new List<string>();

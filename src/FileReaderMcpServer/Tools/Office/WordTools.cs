@@ -97,7 +97,7 @@ public static class WordTools
                 var tableBody = new List<List<object?>>();
                 foreach (var doc in docs)
                 {
-                    if (doc.Content != null && regex.IsMatch(doc.Content))
+                    if (doc.Content != null && regex.IsMatch(CharacterConverter.Normalize(doc.Content)))
                     {
                         totalCount++;
                         tableBody.Add(new List<object?> { doc.Metadata["PageNumber"], doc.Content });

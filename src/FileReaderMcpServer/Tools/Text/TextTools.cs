@@ -114,7 +114,7 @@ public static class TextTools
                 foreach (var line in lines)
                 {
                     lineNumber++;
-                    if (regex.IsMatch(line))
+                    if (regex.IsMatch(CharacterConverter.Normalize(line)))
                     {
                         fileMatches.Add((lineNumber, line));
                         if (totalMatches + fileMatches.Count >= max)
