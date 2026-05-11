@@ -25,7 +25,7 @@ public static class PdfTools
         var docs = CacheReader.ReadPdfFileDocument(file);
         count = docs.Count;
         data.Insert(0, $"Total `{count}` pages in the PDF file `{file}`.");
-        return data.ToString();
+        return data.ToString().TrimEnd();
     }
 
     [McpServerTool(Name = "read_pdf"), Description("Read text content from a PDF file, starting from a specific page.")]
@@ -52,6 +52,10 @@ public static class PdfTools
         if (files == null || files.Length == 0)
         {
             throw new McpException("The full path list of the PDF file cannot be empty or null.");
+        }
+        if (string.IsNullOrWhiteSpace(pattern))
+        {
+            throw new McpException("The search pattern cannot be empty or null.");
         }
         Regex regex;
         try
