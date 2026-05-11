@@ -72,8 +72,14 @@ public static class TextTools
         [Description("The regular expression pattern to match against each line.")] string pattern,
         [Description("The maximum number of matched lines to return across all files.")] int max = 1000)
     {
-        if (files == null || files.Length == 0) return "No files provided.";
-        if (string.IsNullOrEmpty(pattern)) return "Pattern cannot be empty.";
+        if (files == null || files.Length == 0)
+        {
+            throw new McpException("The full path list of the text file cannot be empty or null.");
+        }
+        if (string.IsNullOrEmpty(pattern))
+        {
+            throw new McpException("The search pattern cannot be empty or null.");
+        }
         if (max < 1) max = 1000;
 
         Regex regex;

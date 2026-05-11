@@ -1,3 +1,4 @@
+using ModelContextProtocol;
 using FileReaderMcpServer.Tools.Text;
 using J2N.Text;
 using JiebaNet.Segmenter.Common;
@@ -113,6 +114,55 @@ namespace FileReaderMcpServer.Tests.Tools.Text
 
             // Assert
             StringAssert.Contains(resultNoMatch, "No matches found.");
+        }
+        [TestMethod]
+        public void GrepFiles_NullFiles_ThrowsException()
+        {
+            // Arrange
+            string[] files = null;
+            var expectedMessage = "The full path list of the text file cannot be empty or null.";
+
+            // Act & Assert
+            var exception = Assert.Throws<McpException>(() => TextTools.GrepFiles(files, "test"));
+            Assert.AreEqual(expectedMessage, exception.Message);
+        }
+
+        [TestMethod]
+        public void GrepFiles_EmptyFiles_ThrowsException()
+        {
+            // Arrange
+            var files = new string[0];
+            var expectedMessage = "The full path list of the text file cannot be empty or null.";
+
+            // Act & Assert
+            var exception = Assert.Throws<McpException>(() => TextTools.GrepFiles(files, "test"));
+            Assert.AreEqual(expectedMessage, exception.Message);
+        }
+
+        [TestMethod]
+        public void GrepFiles_InvalidPattern_ThrowsException()
+        {
+            // Arrange
+            var files = new[] { Path.Combine(TestDataDirectory, "search", "zh1.txt") };
+            var pattern = "[";
+            var expectedMessageStart = "Invalid regex pattern: ";
+
+            // Act & Assert
+            var exception = Assert.Throws<McpException>(() => TextTools.GrepFiles(files, pattern));
+            Assert.StartsWith(expectedMessageStart, exception.Message);
+        }
+
+        [TestMethod]
+        public void GrepFiles_EmptyPattern_ThrowsException()
+        {
+            // Arrange
+            var files = new[] { Path.Combine(TestDataDirectory, "search", "zh1.txt") };
+            var pattern = "";
+            var expectedMessage = "The search pattern cannot be empty or null.";
+
+            // Act & Assert
+            var exception = Assert.Throws<McpException>(() => TextTools.GrepFiles(files, pattern));
+            Assert.AreEqual(expectedMessage, exception.Message);
         }
     }
 }
