@@ -26,7 +26,7 @@ public static class Tokenizer
     {
         if (string.IsNullOrWhiteSpace(text)) return new List<string>();
         language ??= GlobalState.Language;
-        text = CharacterConverter.Normalize(text);
+        text = CharacterConverter.Normalize(text, toLower: true);
         if (language == "ja")
         {
             var tokens = new List<string>();

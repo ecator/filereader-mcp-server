@@ -307,6 +307,6 @@ Full-text search across files in a directory using BM25 ranking with keyword fal
 | :--- | :--- | :--- | :--- | :--- |
 | `directory` | string | Yes | - | The directory path to search files in. |
 | `keywords` | array | Yes | - | Keywords to match against file content. |
-| `extensions` | array / null | No | - | Optional array of file extensions to include (e.g. 'xlsx', 'txt'). If not specified, all allowed extensions will be included. You can call `list_allowed_extensions` to see all allowed extensions. |
+| `extensions` | array / null | No | - | Optional array of file extensions to include (e.g. 'xlsx', 'txt'). If not specified, all allowed extensions will be included. |
 | `recurse` | boolean | No | `False` | Whether to search recursively in all subdirectories. |
 | `top` | integer | No | `10` | The maximum number of matched documents to return. |

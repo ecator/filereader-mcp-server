@@ -212,17 +212,25 @@ namespace FileReaderMcpServer.Tests.Utils
             string input = "ＡＢＣ １２３ ｱｲｳｴｵ Test ﾃｽﾄ";
             // 1. Katakana to full-width: ｱｲｳｴｵ -> アイウエオ, ﾃｽﾄ -> テスト
             // 2. Alphanumeric to half-width: ＡＢＣ -> ABC, １２３ -> 123
-            // 3. Lowercase: ABC -> abc, Test -> test
-            string expected = "abc 123 アイウエオ test テスト";
+            // 3. Lowercase: No (default)
+            string expected = "ABC 123 アイウエオ Test テスト";
             Assert.AreEqual(expected, CharacterConverter.Normalize(input));
+        }
+
+        [TestMethod]
+        public void Normalize_WithToLower_ReturnsLowercasedString()
+        {
+            string input = "ＡＢＣ １２３ ｱｲｳｴｵ Test ﾃｽﾄ";
+            string expected = "abc 123 アイウエオ test テスト";
+            Assert.AreEqual(expected, CharacterConverter.Normalize(input, toLower: true));
         }
 
         [TestMethod]
         public void Normalize_WithSymbols_DoesNotConvertSymbolsToHalfWidth()
         {
             string input = "ＡＢＣ！ １２３？";
-            // ABC -> abc, 123 -> 123, symbols ! and ? remain full-width
-            string expected = "abc！ 123？";
+            // ABC -> ABC, 123 -> 123, symbols ! and ? remain full-width
+            string expected = "ABC！ 123？";
             Assert.AreEqual(expected, CharacterConverter.Normalize(input));
         }
 

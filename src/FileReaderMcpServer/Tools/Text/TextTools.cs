@@ -79,7 +79,7 @@ public static class TextTools
         Regex regex;
         try
         {
-            regex = new Regex(pattern, RegexOptions.Compiled | RegexOptions.IgnoreCase);
+            regex = new Regex(CharacterConverter.Normalize(pattern), RegexOptions.Compiled | RegexOptions.IgnoreCase);
         }
         catch (Exception ex)
         {

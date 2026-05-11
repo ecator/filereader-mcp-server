@@ -221,11 +221,12 @@ public static class CharacterConverter
     /// Normalizes the input text by:
     /// 1. Converting half-width Katakana to full-width.
     /// 2. Converting full-width numbers and English letters to half-width.
-    /// 3. Converting all characters to lowercase.
+    /// 3. Converting all characters to lowercase (optional, default false).
     /// </summary>
     /// <param name="input">The string to normalize.</param>
+    /// <param name="toLower">Whether to convert to lowercase.</param>
     /// <returns>The normalized string.</returns>
-    public static string Normalize(string input)
+    public static string Normalize(string input, bool toLower = false)
     {
         if (string.IsNullOrEmpty(input)) return input;
 
@@ -235,7 +236,7 @@ public static class CharacterConverter
         // 2. Convert full-width numbers and English letters to half-width
         result = ToHalfWidth(result, ConvertType.Numbers | ConvertType.Letters);
 
-        // 3. Convert all characters to lowercase
-        return result.ToLowerInvariant();
+        // 3. Convert all characters to lowercase if requested
+        return toLower ? result.ToLowerInvariant() : result;
     }
 }
