@@ -67,6 +67,10 @@ public static class PowerPointTools
         {
             throw new McpException("The full path list of the PowerPoint file cannot be empty or null.");
         }
+        if (string.IsNullOrWhiteSpace(pattern))
+        {
+            throw new McpException("The regex pattern cannot be empty or null.");
+        }
         Regex regex;
         try
         {

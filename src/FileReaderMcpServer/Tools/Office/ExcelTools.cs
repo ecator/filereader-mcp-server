@@ -134,6 +134,10 @@ public static class ExcelTools
         {
             throw new McpException("The full path list of the Excel file cannot be empty or null.");
         }
+        if (string.IsNullOrWhiteSpace(pattern))
+        {
+            throw new McpException("The regex pattern cannot be empty or null.");
+        }
         data.AppendLine();
         data.AppendLine();
         Regex regex;
