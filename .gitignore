@@ -6,3 +6,4 @@ obj/
 TestResults/
 tests/TestData/test.md
 win-x64/
+tests/TestData/office/~$*
